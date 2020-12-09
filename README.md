@@ -1,3 +1,45 @@
+## 改动的代码
+```
+
+if (Java.available) {
+  Java.perform(function () {
+    Java.use("java.net.SocketOutputStream").socketWrite0.overload('java.io.FileDescriptor', '[B', 'int', 'int').implementation = function (fd, bytearry, offset, byteCount) {
+      var result = this.socketWrite0(fd, bytearry, offset, byteCount);
+      var message = {};
+      message["function"] = "HTTP_send";
+      message["ssl_session_id"] = "";
+      message["src_addr"] = ntohl(ipToNumber((this.socket.value.getLocalAddress().toString().split(":")[0]).split("/").pop()));
+      message["src_port"] = parseInt(this.socket.value.getLocalPort().toString());
+      message["dst_addr"] = ntohl(ipToNumber((this.socket.value.getRemoteSocketAddress().toString().split(":")[0]).split("/").pop()));
+      message["dst_port"] = parseInt(this.socket.value.getRemoteSocketAddress().toString().split(":").pop());
+      var ptr = Memory.alloc(byteCount);
+      for (var i = 0; i < byteCount; ++i)
+        Memory.writeS8(ptr.add(i), bytearry[offset + i]);
+      send(message, Memory.readByteArray(ptr, byteCount))
+      return result;
+    }
+    Java.use("java.net.SocketInputStream").socketRead0.overload('java.io.FileDescriptor', '[B', 'int', 'int', 'int').implementation = function (fd, bytearry, offset, byteCount, timeout) {
+      var result = this.socketRead0(fd, bytearry, offset, byteCount, timeout);
+      var message = {};
+      message["function"] = "HTTP_recv";
+      message["ssl_session_id"] = "";
+      message["src_addr"] = ntohl(ipToNumber((this.socket.value.getRemoteSocketAddress().toString().split(":")[0]).split("/").pop()));
+      message["src_port"] = parseInt(this.socket.value.getRemoteSocketAddress().toString().split(":").pop());
+      message["dst_addr"] = ntohl(ipToNumber((this.socket.value.getLocalAddress().toString().split(":")[0]).split("/").pop()));
+      message["dst_port"] = parseInt(this.socket.value.getLocalPort());
+      if (result > 0) {
+        var ptr = Memory.alloc(result);
+        for (var i = 0; i < result; ++i)
+          Memory.writeS8(ptr.add(i), bytearry[offset + i]);
+        send(message, Memory.readByteArray(ptr, result))
+      }
+      return result;
+    }
+  })
+}
+
+```
+
 # r0capture
 
 安卓应用层抓包通杀脚本
