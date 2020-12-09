@@ -1,4 +1,9 @@
 ## 改动的代码
+
+
+https://github.com/BigFaceCat2017/frida_ssl_logger/blob/master/script.js
+https://raw.githubusercontent.com/r0ysue/r0capture/main/script.js
+
 ```
 
 if (Java.available) {
